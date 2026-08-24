@@ -1,8 +1,11 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
+﻿using Mapster;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApi001.Data;
 using WebApi001.DTOs;
+using WebApi001.Model;
+using WebApi001.Repositories.Interfaces;
 
 
 namespace WebApi001.Controllers
@@ -11,33 +14,19 @@ namespace WebApi001.Controllers
     [Route("api/[controller]")]
     public class BooksController : ControllerBase
     {
+        private readonly IBookRepository _bookRepository;
         private readonly LibrarydbContext context;
-        public BooksController(LibrarydbContext context)
+        
+        public BooksController(LibrarydbContext context, IBookRepository bookRepository)
         {
             this.context = context;
+            this._bookRepository = bookRepository;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllBooks()
         {
-            var books = await context.Books
-                .Include(b => b.Author)
-                .Include(b => b.Category)
-                .Include(b => b.Publisher)
-                .AsNoTracking()
-                .ToListAsync();
-
-            var result = books.Select(b => new BookRespondeDTOs
-            {
-                Isbn = b.Isbn,
-                Title = b.Title,
-                Author = b.Author.Name,
-                Category = b.Category.Name,
-                Publisher = b.Publisher != null ? b.Publisher.Name : null,
-                PublicationYear = b.PublicationYear,
-                TotalCopies = b.TotalCopies,
-                AvailableCopies = b.AvailableCopies
-            });
+           var result = await _bookRepository.GetAllBooksAsync();
             return Ok(result);
         }
 
@@ -45,51 +34,22 @@ namespace WebApi001.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetBookById(int id)
         {
-            var book = await context.Books
-                .Include(b => b.Author)
-                .Include(b => b.Category)
-                .Include(b => b.Publisher)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(b => b.BookId == id);
-
-            if (book == null)
+           var result = await _bookRepository.GetBookByIdAsync(id);
+            if (result == null)
             {
-                return NotFound();
+                return NotFound(new
+                {
+                    message = $"Book with ID {id} not found."
+                });
             }
-
-            var result = new BookRespondeDTOs
-            {
-                Isbn = book.Isbn,
-                Title = book.Title,
-                Author = book.Author.Name,
-                Category = book.Category.Name,
-                Publisher = book.Publisher != null ? book.Publisher.Name : null,
-                PublicationYear = book.PublicationYear,
-                TotalCopies = book.TotalCopies,
-                AvailableCopies = book.AvailableCopies
-            };
-
             return Ok(result);
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateBook(CreateBookDTOs createBookDTO)
         {
-            var book = new Model.Book
-            {
-                Isbn = createBookDTO.Isbn,
-                Title = createBookDTO.Title,
-                AuthorId = createBookDTO.AuthorId,
-                CategoryId = createBookDTO.CategoryId,
-                PublisherId = createBookDTO.PublisherId,
-                PublicationYear = createBookDTO.PublicationYear,
-                TotalCopies = createBookDTO.TotalCopies,
-                AvailableCopies = createBookDTO.AvailableCopies,
-                CreatedAt = DateTime.UtcNow
-            };
-            context.Books.Add(book);
-            await context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetBookById), new { id = book.BookId }, book);
+          var result = await _bookRepository.CreateBookAsync(createBookDTO);
+            return Ok(result);
         }
 
         [HttpPut("{id}")]
@@ -119,6 +79,27 @@ namespace WebApi001.Controllers
                 message = $"Book with ID {id} updated successfully."
             });
         }
+
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteBook(int id)
+        {
+            var result = await _bookRepository.DeleteBookAsync(id);
+            if (!result)
+            {
+                return NotFound(new
+                {
+                    message = $"Book with ID {id} not found."
+                });
+            }
+            return Ok(new
+            {
+                message = $"Book with ID {id} deleted successfully."
+            });
+        }
+
+            
+        
 
 
     }
