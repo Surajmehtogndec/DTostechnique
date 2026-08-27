@@ -1,12 +1,14 @@
 ﻿using WebApi001.DTOs;
-namespace WebApi001.Repositories.Interfaces
+
+namespace WebApi001.Services.Interfaces
 {
-    public interface IBookRepository
+    public interface IBookService
     {
         Task<List<BookRespondeDTOs>> GetAllBooksAsync();
         Task<BookRespondeDTOs?> GetBookByIdAsync(int id);
         Task<BookRespondeDTOs> CreateBookAsync(CreateBookDTOs createBookDTO);
-        Task<BookRespondeDTOs?> UpdateBookAsync(int id, UpdateBookDTOs updateBookDTO);
+        Task<BookRespondeDTOs?> UpdateBookAsync(int id, UpdateBookDTOs  updateBookDTO);
         Task<bool> DeleteBookAsync(int id);
-    } 
+
+    }
 }

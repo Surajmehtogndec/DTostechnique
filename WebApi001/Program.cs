@@ -4,6 +4,8 @@ using WebApi001.Exceptions;
 using WebApi001.Mappings;
 using WebApi001.Repositories;
 using WebApi001.Repositories.Interfaces;
+using WebApi001.Services;
+using WebApi001.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +15,7 @@ builder.Services.AddControllers();
 MapsterConfig.RegisterMappings();
 builder.Services.AddProblemDetails();
 builder.Services.AddScoped<IBookRepository, BookRepository>();
+builder.Services.AddScoped<IBookService, BookService>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

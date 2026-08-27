@@ -62,7 +62,7 @@ namespace WebApi001.Repositories
             return book.Adapt<BookRespondeDTOs>();
         }
 
-        public async Task<BookRespondeDTOs?> UpdateBookAsync(int id, CreateBookDTOs updateBookDTO)
+        public async Task<BookRespondeDTOs?> UpdateBookAsync(int id, UpdateBookDTOs updateBookDTO)
         {
             var book = await _context.Books.FindAsync(id);
             if (book == null)
