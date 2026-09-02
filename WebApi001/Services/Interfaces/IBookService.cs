@@ -4,7 +4,7 @@ namespace WebApi001.Services.Interfaces
 {
     public interface IBookService
     {
-        Task<List<BookRespondeDTOs>> GetAllBooksAsync();
+        Task<PaginationResponseDTO<BookRespondeDTOs>> GetAllBooksAsync(PaginationRequestDTO pagination);
         Task<BookRespondeDTOs?> GetBookByIdAsync(int id);
         Task<BookRespondeDTOs> CreateBookAsync(CreateBookDTOs createBookDTO);
         Task<BookRespondeDTOs?> UpdateBookAsync(int id, UpdateBookDTOs  updateBookDTO);

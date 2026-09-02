@@ -27,9 +27,9 @@ namespace WebApi001.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllBooks()
+        public async Task<IActionResult> GetAllBooks([FromQuery] PaginationRequestDTO pagination)
         {
-           var result = await _bookService.GetAllBooksAsync();
+           var result = await _bookService.GetAllBooksAsync(pagination);
             return Ok(result);
         }
 

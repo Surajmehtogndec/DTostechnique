@@ -71,7 +71,8 @@ public partial class LibrarydbContext : DbContext
             entity.HasIndex(e => e.Isbn, "UQ_Books_ISBN").IsUnique();
 
             entity.Property(e => e.BookId).HasColumnType("int(11)");
-            entity.Property(e => e.AuthorId).HasColumnType("int(11)");
+            entity.Property(e => e.AuthorId).HasColumnType("int(11)")
+            .ValueGeneratedOnAdd();
             entity.Property(e => e.AvailableCopies)
                 .HasDefaultValueSql("'1'")
                 .HasColumnType("int(11)");

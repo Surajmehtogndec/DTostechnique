@@ -16,15 +16,33 @@ namespace WebApi001.Repositories
             _context = context;  
         }
 
-        public async Task<List<BookRespondeDTOs>> GetAllBooksAsync()
+        public async Task<PaginationResponseDTO<BookRespondeDTOs>> GetAllBooksAsync(PaginationRequestDTO pagination)
         {
+            var totalRecords = await _context.Books.CountAsync();
+            var totalPages = (int)Math.Ceiling(totalRecords / (double)pagination.PageSize);
+
+
             var books = await _context.Books
                 .Include(b => b.Author)
                 .Include(b => b.Category)
                 .Include(b => b.Publisher)
                 .AsNoTracking()
+                .OrderBy(b => b.BookId)
+                .Skip((pagination.PageNumber - 1) * pagination.PageSize)
+                .Take(pagination.PageSize)
                 .ToListAsync();
-            return books.Adapt<List<BookRespondeDTOs>>();
+            var data = books.Adapt<List<BookRespondeDTOs>>();
+            return new PaginationResponseDTO<BookRespondeDTOs>
+            {
+                Data = data,
+                PageNumber = pagination.PageNumber,
+                PageSize = pagination.PageSize,
+                TotalRecords = totalRecords,
+                TotalPages = totalPages,
+                HasNextPage = pagination.PageNumber < totalPages,
+                HasPreviousPage = pagination.PageNumber > 1
+               
+            };
         }
 
         public async Task<BookRespondeDTOs?> GetBookByIdAsync(int id)

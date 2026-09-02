@@ -12,9 +12,9 @@ namespace WebApi001.Services
             _bookRepository = bookRepository;
         }
 
-        public async Task<List<BookRespondeDTOs>> GetAllBooksAsync()
+        public async Task<PaginationResponseDTO<BookRespondeDTOs>> GetAllBooksAsync(PaginationRequestDTO pagination)
         {
-            return await _bookRepository.GetAllBooksAsync();
+            return await _bookRepository.GetAllBooksAsync(pagination);
         }
 
         public async Task<BookRespondeDTOs?> GetBookByIdAsync(int id)
