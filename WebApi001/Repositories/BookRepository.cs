@@ -5,6 +5,7 @@ using Mapster;
 using WebApi001.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http.HttpResults;
 namespace WebApi001.Repositories
 {
     public class BookRepository : IBookRepository
@@ -16,33 +17,67 @@ namespace WebApi001.Repositories
             _context = context;  
         }
 
-        public async Task<PaginationResponseDTO<BookRespondeDTOs>> GetAllBooksAsync(PaginationRequestDTO pagination)
+        public async Task<List<BookRespondeDTOs>> GetAllBooksAsync(
+         
+         BookFilterDTO filter)
         {
-            var totalRecords = await _context.Books.CountAsync();
-            var totalPages = (int)Math.Ceiling(totalRecords / (double)pagination.PageSize);
-
-
-            var books = await _context.Books
+            var query = _context.Books
                 .Include(b => b.Author)
                 .Include(b => b.Category)
                 .Include(b => b.Publisher)
                 .AsNoTracking()
-                .OrderBy(b => b.BookId)
-                .Skip((pagination.PageNumber - 1) * pagination.PageSize)
-                .Take(pagination.PageSize)
-                .ToListAsync();
-            var data = books.Adapt<List<BookRespondeDTOs>>();
-            return new PaginationResponseDTO<BookRespondeDTOs>
-            {
-                Data = data,
-                PageNumber = pagination.PageNumber,
-                PageSize = pagination.PageSize,
-                TotalRecords = totalRecords,
-                TotalPages = totalPages,
-                HasNextPage = pagination.PageNumber < totalPages,
-                HasPreviousPage = pagination.PageNumber > 1
-               
-            };
+                .AsQueryable();
+
+
+            // searching
+
+            if (!string.IsNullOrWhiteSpace(filter.search)){
+                query = query.Where(b =>
+                b.Title.Contains(filter.search));
+
+                
+            }
+            // sorting
+
+            var sortBy = filter.sortBy?.ToLower();
+            var sortOrder = filter.sortOrder?.ToLower();
+
+            if(sortBy == "year") {
+                query = sortOrder == "Asc"
+                        ? query.OrderBy(b => b.PublicationYear)
+                        :query.OrderBy(b => b.PublicationYear);
+            }
+
+            //// Filtering
+
+            //if (filter.CategoryId.HasValue)
+            //{
+            //    query = query.Where(
+            //        b => b.CategoryId == filter.CategoryId.Value);
+            //}
+
+            //if (filter.AutherId.HasValue)
+            //{
+            //    query = query.Where(
+            //        b => b.AuthorId == filter.AutherId.Value);
+            //}
+
+            //if (filter.PublisherId.HasValue)
+            //{
+            //    query = query.Where(
+            //        b => b.PublisherId == filter.PublisherId.Value);
+            //}
+
+            //if (filter.PublicationYear.HasValue)
+            //{
+            //    query = query.Where(
+            //        b => b.PublicationYear ==
+            //             filter.PublicationYear.Value);
+            //}
+
+            var books = await query.ToListAsync();
+            return books.Adapt<List<BookRespondeDTOs>>();
+
         }
 
         public async Task<BookRespondeDTOs?> GetBookByIdAsync(int id)

@@ -1,4 +1,5 @@
-﻿using Mapster;
+﻿using Asp.Versioning;
+using Mapster;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,10 +10,11 @@ using WebApi001.Repositories.Interfaces;
 using WebApi001.Services.Interfaces;
 
 
-namespace WebApi001.Controllers
+namespace WebApi001.Controllers.V1
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [ApiVersion(1.0)]
+    [Route("api/v{version:apiVersion}/[controller]")] 
     public class BooksController : ControllerBase
     {
         private readonly IBookRepository _bookRepository; 
@@ -27,9 +29,9 @@ namespace WebApi001.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllBooks([FromQuery] PaginationRequestDTO pagination)
+        public async Task<IActionResult> GetAllBooks( [FromQuery] BookFilterDTO filter)
         {
-           var result = await _bookService.GetAllBooksAsync(pagination);
+           var result = await _bookService.GetAllBooksAsync(filter);
             return Ok(result);
         }
 
