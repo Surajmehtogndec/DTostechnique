@@ -64,7 +64,7 @@ builder.Services.AddApiVersioning(options =>
     options.AssumeDefaultVersionWhenUnspecified = true;
     options.ReportApiVersions = true;
 
-    options.ApiVersionReader = new UrlSegmentApiVersionReader();
+    options.ApiVersionReader = new MediaTypeApiVersionReader("v");
 })
  .AddApiExplorer(options =>
  {
@@ -79,18 +79,14 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
-}
 
-app.UseSwaggerUI(options =>
-{
-    options.SwaggerEndpoint("/swagger/v1/swagger.json",
-        "WebApi001 V1"
-        );
-    options.SwaggerEndpoint("/swagger/v2/swagger.json",
-        "WebApi001 V2"
-        );
-});
+    // 1. Custom endpoints ko development block ke andar hi rakhein
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "WebApi001 V1");
+        options.SwaggerEndpoint("/swagger/v2/swagger.json", "WebApi001 V2");
+    });
+}
 app.MapControllers();
 app.UseHttpsRedirection();
 

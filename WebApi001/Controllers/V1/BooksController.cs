@@ -14,7 +14,7 @@ namespace WebApi001.Controllers.V1
 {
     [ApiController]
     [ApiVersion(1.0)]
-    [Route("api/v{version:apiVersion}/[controller]")] 
+    [Route("api/[controller]")] 
     public class BooksController : ControllerBase
     {
         private readonly IBookRepository _bookRepository; 
